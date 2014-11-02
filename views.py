@@ -13,7 +13,7 @@ app.secret_key = '佐久間さん可愛い'
 image_ptrn = re.compile('.*[.](jpg|jpeg|png|bmp|gif)$')
 image_dir = os.path.join( 'static', 'img' )
 images = []
-images = [ image for image in os.listdir( image_dir ) if re.match( image_ptrn, image ) ]
+images = sorted([image for image in os.listdir( image_dir ) if re.match( image_ptrn, image )])
 if not len( images ):
     sys.exit( 'Error: Could not find images')
 
@@ -54,7 +54,6 @@ def _next():
         #囲まれた範囲の座標
         coords = request.args.get('coords')
         coords = json.loads(coords)
-
         #処理中の画像のパス
         image_path = os.path.join( image_dir, images[pos] )
 
