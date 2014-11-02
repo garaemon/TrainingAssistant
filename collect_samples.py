@@ -21,9 +21,8 @@ def getUrls( word, key, skip=0, urls=[] ):
     if skip:
         params.update( { '$skip': str( skip ) } )
 
-    results = requests.get( prefix, auth=( key, key ), params=params )
-    results = results.json
-
+    results = requests.get( prefix, auth=( key, key ), params=params)
+    results = results.json()
     for result in results['d']['results']:
         typ = result[ 'ContentType' ]
         if typ== 'image/jpg' or typ == 'image/jpeg':
@@ -35,15 +34,24 @@ def getUrls( word, key, skip=0, urls=[] ):
         return urls
 
 def saveImages( urls, dir ):
+    counter = 0
     for url in urls:
         try:
-            img = requests.get( url ).content
-            f = open( os.path.join( dir, os.path.basename( url ) ), 'wb' )
-            f.write( img )
-            img.close()
-            f.close()
-        except:
+            counter = counter + 1
+            print "writing [%d/%d]: %s" % (counter, len(urls), url)
+            fname = os.path.join( dir, os.path.basename( url ) )
+            if not os.path.exists(fname):
+                img = requests.get(url, timeout=5).content
+                f = open(fname , 'wb' )
+                f.write( img )
+                f.close()
+        except Exception, e:
+            print "failed to get "
+            print url
+            print e.message
             pass
+        except requests.exceptions.ReadTimeout:
+            print "timeout"
 
 if __name__ == '__main__':
     word = settings.word
@@ -52,4 +60,3 @@ if __name__ == '__main__':
 
     urls = getUrls( word, key )
     saveImages( urls, dir )
-
