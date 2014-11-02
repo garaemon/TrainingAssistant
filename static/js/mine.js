@@ -1,3 +1,4 @@
+var always_only_one_sample = false; // 一つの画像に高々一つしか正解データがないときtrueにする
 var coords = new Array();
 var curcrd;
 var canvas;
@@ -17,7 +18,23 @@ onload = function(){
   $('.bar').css({'width': count*100/imgnum + '%'});
 };
 
+function keypressed(e) {
+  if (e.keyCode == 32) {        // space
+    nextajax(skip=0);
+  }
+  else if (e.keyCode == 83) {   // s
+    nextajax(skip=1);
+  }
+  else if (e.keyCode == 82) {   // r
+    if (!released_flag) {
+      released();
+    }
+    resetstatus();
+  }
+}
+
 function draw(){
+  released_flag = false;
   var image = new Image();
   image.src = imgsrc;
   image.onload = function(){
@@ -34,10 +51,13 @@ function draw(){
     context.drawImage(image, 0, 0);
     $(function(){
       $('#cnvs').Jcrop({
-        onSelect: selected, 
-        onRelease: released, 
+        onSelect: selected,
+        onRelease: released,
+        keySupport: true
       });
+      $('.jcrop-keymgr').keydown(keypressed);
     });
+    document.onkeydown = keypressed;
   }
 }
 
@@ -51,6 +71,7 @@ function released(c){
   context.lineWidth = 3;
   context.strokeStyle = 'rgba(238, 26, 26, 1)';
   context.strokeRect(curcrd[0], curcrd[1], curcrd[2], curcrd[3]);
+  released_flag = true;
 }
 
 function resetstatus(){
@@ -62,9 +83,9 @@ function nextajax(skip){
   console.log('座標:'+coords);
   coords = JSON.stringify(coords);
   $.ajax({
-    type: 'GET', 
+    type: 'GET',
     dataType: "json",
-    data: {'coords': coords, 'skip': skip}, 
+    data: {'coords': coords, 'skip': skip},
     url: "/_next",
     success: function (data) {
       imgsrc = data.imgsrc;
@@ -72,7 +93,7 @@ function nextajax(skip){
       var finished = data.finished;
       $('.bar').css({'width': count*100/imgnum + '%'});
       console.log(count + '/' + imgnum);
-      
+
       if (finished){
         w = $('.head-wrapper').width()
         $('.main-wrapper').css({'width': w, 'minWidth': w});
