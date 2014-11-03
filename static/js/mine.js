@@ -20,15 +20,15 @@ onload = function(){
 
 function keypressed(e) {
   if (e.keyCode == 32) {        // space
+    if (!released_flag) {
+      released();
+    }
     nextajax(skip=0);
   }
   else if (e.keyCode == 83) {   // s
     nextajax(skip=1);
   }
   else if (e.keyCode == 82) {   // r
-    if (!released_flag) {
-      released();
-    }
     resetstatus();
   }
 }
